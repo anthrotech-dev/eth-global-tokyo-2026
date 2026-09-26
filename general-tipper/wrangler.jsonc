@@ -1,0 +1,30 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "general-tipper",
+	"main": "worker/index.ts",
+	"compatibility_date": "2026-09-25",
+	"assets": {
+		"not_found_handling": "single-page-application",
+		// These paths are answered by the Worker, not the SPA fallback.
+		"run_worker_first": ["/api/*", "/demo", "/demo/*", "/.well-known/*"]
+	},
+	"observability": {
+		"enabled": true
+	},
+	"upload_source_maps": true,
+	/**
+	 * Environment Variables (override locally via .dev.vars)
+	 * ALLOW_PRIVATE_HOSTS: "true" lets the resolver fetch localhost / private IPs (dev only).
+	 * DEMO_*: addresses advertised by the built-in fixture (/demo/@alice, /.well-known/tip-router).
+	 */
+	"vars": {
+		"ALLOW_PRIVATE_HOSTS": "false",
+		"DEMO_RECEIVER": "0x70997970C51812dc3A010C7d01b50e0d17dc79C8",
+		"DEMO_HOST": "0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC",
+		"DEMO_FEE_BPS": "2000"
+	}
+}
