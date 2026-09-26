@@ -58,16 +58,6 @@ function App() {
         {showVerify && <VerifyCard report={state.report} verifying={step === 'verifying'} onVerify={verify} />}
         {error?.at === 'verifying' && <ErrorBox message={error.message} />}
       </main>
-
-      <footer className="foot">
-        <a href="/demo" target="_blank" rel="noreferrer">
-          demo fixtures
-        </a>
-        {' · '}
-        <a href="/.well-known/tip-router" target="_blank" rel="noreferrer">
-          this site's tip-router
-        </a>
-      </footer>
     </>
   )
 }

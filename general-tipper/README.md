@@ -29,7 +29,7 @@ and [../contract](../contract) for the `TipSplitter` contract.
 
 ```
 shared/tipRouter.ts   protocol constants, types, parsers (Worker + client)
-worker/               resolver API (/api/resolve), SSRF guard, demo fixtures
+worker/               resolver API (/api/resolve), SSRF guard
 src/lib/              chain config, ABI, viem clients, tip + verifier logic
 src/hooks/            useWallet (MetaMask), useTipFlow (state machine)
 src/components/       one card per step
@@ -40,9 +40,9 @@ Worker routes:
 | Route | Purpose |
 | --- | --- |
 | `GET /api/resolve?url=…` | Resolve a profile URL to `{ targetURI, receiver, host, ratioBps, … }` |
-| `GET /demo/@alice` | Fixture profile whose bio contains `ethereum:…` (and a `sui:…`) |
-| `GET /demo/@nobody` | Fixture profile without a tipjar (error path) |
-| `GET /.well-known/tip-router` | This origin's own tip-router document (fixture host) |
+
+Everything else is served from the built SPA. There are no built-in fixtures;
+point the app at a real profile such as <https://fluffy.social/@totegamma>.
 
 ## Local development (Anvil)
 
@@ -57,7 +57,7 @@ forge script script/TipSplitter.s.sol --rpc-url http://127.0.0.1:8545 --broadcas
 # 2. app
 cd ../general-tipper
 cp .env.example .env.local              # VITE_CHAIN=anvil, contract address above
-cp .dev.vars.example .dev.vars          # ALLOW_PRIVATE_HOSTS=true, demo addresses
+cp .dev.vars.example .dev.vars          # ALLOW_PRIVATE_HOSTS=true
 npm install
 npm run dev                             # http://localhost:5173
 ```
@@ -66,14 +66,16 @@ In MetaMask import Anvil account 0 (the key above). The app adds/switches to
 chain 31337 on connect. After restarting `anvil`, clear MetaMask's activity data
 so the cached nonce resets.
 
-Then open the app, click "Use the built-in demo profile", resolve, send 1 ETH
-and watch the split (0.8 / 0.2) and the verifier checks.
+Then open the app, click the example profile (<https://fluffy.social/@totegamma>),
+resolve, send some ETH and watch the split and the verifier checks. Any profile
+whose page contains `ethereum:0x…` works; the split depends on the
+`/.well-known/tip-router` document served by that profile's host.
 
-Check balances from the shell:
+Check a balance from the shell:
 
 ```sh
 cast call 0x5FbDB2315678afecb367f032d93F642f64180aa3 "balances(address)(uint256)" \
-  0x70997970C51812dc3A010C7d01b50e0d17dc79C8 --rpc-url http://127.0.0.1:8545
+  0xReceiverAddress --rpc-url http://127.0.0.1:8545
 ```
 
 ## Sepolia / deploy
@@ -84,7 +86,6 @@ forge script script/TipSplitter.s.sol --rpc-url $SEPOLIA_RPC --broadcast --priva
 
 cd ../general-tipper
 # .env.production (or shell): VITE_CHAIN=sepolia VITE_TIPSPLITTER_ADDRESS=0x…
-# wrangler.jsonc "vars": set DEMO_RECEIVER / DEMO_HOST to addresses you control
 npm run deploy
 ```
 

@@ -206,12 +206,6 @@ a {
   color: #dc2626;
 }
 
-.foot {
-  padding: 16px 0 32px;
-  font-size: 14px;
-  border-top: 1px solid var(--border);
-}
-
 @media (max-width: 640px) {
   .top {
     flex-direction: column;

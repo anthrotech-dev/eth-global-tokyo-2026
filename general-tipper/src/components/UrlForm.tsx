@@ -8,7 +8,7 @@ type Props = {
 
 export function UrlForm({ busy, disabled, onSubmit }: Props) {
   const [url, setUrl] = useState('')
-  const demoUrl = `${window.location.origin}/demo/@alice`
+  const exampleUrl = 'https://fluffy.social/@totegamma'
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -19,13 +19,13 @@ export function UrlForm({ busy, disabled, onSubmit }: Props) {
     <section className="card">
       <h2>1. Who do you want to tip?</h2>
       <p className="hint">
-        Paste a profile URL. The page must contain <code>ethereum:0x…</code> somewhere (for example in a Mastodon bio).
+        Paste a profile URL. The page must contain <code>ethereum:0x…</code> somewhere (for example in a Misskey or Mastodon bio).
       </p>
       <form onSubmit={submit} className="row">
         <input
           type="url"
           required
-          placeholder="https://mastodon.example/@alice"
+          placeholder="https://misskey.example/@alice"
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           disabled={disabled}
@@ -36,9 +36,9 @@ export function UrlForm({ busy, disabled, onSubmit }: Props) {
       </form>
       {!disabled && (
         <p className="hint">
-          No profile handy?{' '}
-          <button type="button" className="link" onClick={() => setUrl(demoUrl)}>
-            Use the built-in demo profile
+          No profile handy? Try a real Misskey account:{' '}
+          <button type="button" className="link" onClick={() => setUrl(exampleUrl)}>
+            {exampleUrl}
           </button>
         </p>
       )}
