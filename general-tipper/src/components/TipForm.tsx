@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from 'react'
+import { formatEther, parseEther } from 'viem'
 import { chain } from '../lib/chain.ts'
 import type { WalletState } from '../hooks/useWallet.ts'
 import { ErrorBox } from './ErrorBox.tsx'
@@ -11,7 +12,14 @@ type Props = {
 
 export function TipForm({ wallet, sending, onSend }: Props) {
   const [amount, setAmount] = useState('0.01')
-  const canSend = !!wallet.account && wallet.onTargetChain && !sending
+  let amountWei: bigint | undefined
+  try {
+    amountWei = parseEther(amount)
+  } catch {
+    amountWei = undefined
+  }
+  const insufficient = wallet.balance !== undefined && amountWei !== undefined && wallet.balance < amountWei
+  const canSend = !!wallet.account && wallet.onTargetChain && !sending && amountWei !== undefined && !insufficient
 
   const submit = (e: FormEvent) => {
     e.preventDefault()
@@ -24,7 +32,15 @@ export function TipForm({ wallet, sending, onSend }: Props) {
       <div className="row wallet">
         <span className={`badge ${wallet.onTargetChain ? 'ok' : ''}`}>{chain.name}</span>
         {wallet.account ? (
-          <code className="addr">{wallet.account}</code>
+          <>
+            <code className="addr">{wallet.account}</code>
+            {wallet.balance !== undefined && (
+              <span className="hint">balance {Number(formatEther(wallet.balance)).toLocaleString()} ETH</span>
+            )}
+            <button type="button" className="link" onClick={() => wallet.chooseAccount()}>
+              Switch account
+            </button>
+          </>
         ) : (
           <button type="button" onClick={wallet.connect} disabled={!wallet.hasProvider || wallet.connecting}>
             {wallet.connecting ? 'Connecting…' : 'Connect wallet'}
@@ -38,6 +54,11 @@ export function TipForm({ wallet, sending, onSend }: Props) {
       </div>
       {!wallet.hasProvider && <ErrorBox message="No injected wallet detected. Install MetaMask and reload." />}
       {wallet.error && <ErrorBox message={wallet.error} />}
+      {insufficient && (
+        <ErrorBox
+          message={`This account has ${formatEther(wallet.balance!)} ETH on ${chain.name}, less than the tip. Pick a funded account with "Switch account" (on Anvil, import account 0).`}
+        />
+      )}
       <form onSubmit={submit} className="row">
         <input
           type="text"
