@@ -45,14 +45,18 @@ export function handleDemo(request: Request, env: Env): Response | null {
   const path = url.pathname
 
   if (path === WELL_KNOWN_PATH) {
-    const body = { version: 1, feeBps: Number(env.DEMO_FEE_BPS), tipjars: { ethereum: env.DEMO_HOST } }
+    const body = {
+      version: 1,
+      feeBps: Number(env.DEMO_FEE_BPS),
+      tipjars: { ethereum: env.DEMO_HOST, sui: env.DEMO_SUI_HOST },
+    }
     return Response.json(body, { headers: { 'Cache-Control': 'no-store' } })
   }
 
   if (path === '/demo/@alice') {
     return profilePage(
       'alice',
-      `Hi, I'm Alice. I post about coffee and Ethereum.\n\nethereum:${env.DEMO_RECEIVER}\nsui:0x${'ab'.repeat(32)}`,
+      `Hi, I'm Alice. I post about coffee, Ethereum, and Sui.\n\nethereum:${env.DEMO_RECEIVER}\nsui:${env.DEMO_SUI_RECEIVER}`,
     )
   }
   if (path === '/demo/@nobody') {

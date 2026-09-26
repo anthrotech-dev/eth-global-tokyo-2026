@@ -36,7 +36,9 @@ export default {
       const target = url.searchParams.get('url')
       if (!target) return failure('INVALID_URL', 'Missing `url` query parameter', 400)
 
-      const allowPrivate = env.ALLOW_PRIVATE_HOSTS === 'true'
+      // Wrangler's generated production type is the literal "false", while
+      // .dev.vars may override it with "true" for local fixture resolution.
+      const allowPrivate = (env.ALLOW_PRIVATE_HOSTS as string) === 'true'
       try {
         const result = await resolveProfile(target, allowPrivate, makeSelfAwareFetcher(url.origin, env))
         return new Response(JSON.stringify(result), { headers: JSON_HEADERS })
