@@ -13,7 +13,8 @@
   },
   "dependencies": {
     "react": "^19.2.8",
-    "react-dom": "^19.2.8"
+    "react-dom": "^19.2.8",
+    "viem": "^2.56.9"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.60.2",
