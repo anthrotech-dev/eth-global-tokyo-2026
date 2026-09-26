@@ -1,5 +1,6 @@
 import {
   NETWORKS,
+  NETWORK_NAMES,
   PAY_NETWORK,
   WELL_KNOWN_PATH,
   canonicalizeTargetURI,
@@ -10,7 +11,6 @@ import {
   type Network,
   type ResolveResult,
 } from '../shared/tipRouter.ts'
-import type { Address } from 'viem'
 import { ResolveError, safeFetchText } from './safeFetch.ts'
 
 const PROFILE_TIMEOUT_MS = 8_000
@@ -82,14 +82,16 @@ export async function resolveProfile(rawUrl: string, allowPrivate: boolean, fetc
 
   const isJson = /json/i.test(page.contentType ?? '')
   const extracted = extractTipjars(isJson ? activityPubSearchText(page.text) : page.text)
-  const receiver = extracted.tipjars[PAY_NETWORK]
+  const payableNetworks = NETWORK_NAMES.filter((network) => NETWORKS[network].payable && extracted.tipjars[network] !== undefined)
+  const network = payableNetworks[0]
+  const receiver = network ? extracted.tipjars[network] : undefined
   if (receiver === undefined) {
     if (extracted.invalid[PAY_NETWORK] === 'BAD_CHECKSUM') {
       throw new ResolveError('BAD_CHECKSUM', `${PAY_NETWORK}: address on the profile has an invalid checksum`, 422)
     }
     const others = (Object.keys(extracted.tipjars) as Network[]).map((n) => NETWORKS[n].label)
     const hint = others.length ? ` (found only: ${others.join(', ')})` : ''
-    throw new ResolveError('NO_TIPJAR', `No \`${PAY_NETWORK}:0x...\` declaration found on the profile${hint}`, 404)
+    throw new ResolveError('NO_TIPJAR', `No supported tipjar declaration found on the profile${hint}`, 404)
   }
 
   const host = await resolveHost(target.origin, allowPrivate, fetcher)
@@ -98,13 +100,13 @@ export async function resolveProfile(rawUrl: string, allowPrivate: boolean, fetc
     ok: true,
     targetURI,
     origin: target.origin,
-    network: PAY_NETWORK,
-    receiver: receiver as Address,
+    network,
+    receiver,
     receiverTipjars: extracted.tipjars,
     receiverSource: {
       url: page.finalUrl,
       contentType: page.contentType,
-      candidates: extracted.candidates[PAY_NETWORK] ?? 0,
+      candidates: extracted.candidates[network] ?? 0,
     },
     host,
     ratioBps: host.status === 'ok' ? feeBpsToRatioBps(host.feeBps) : feeBpsToRatioBps(0),

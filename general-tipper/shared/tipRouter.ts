@@ -39,7 +39,7 @@ export const NETWORKS = {
   },
   sui: {
     label: 'Sui',
-    payable: false,
+    payable: true,
     normalize(raw) {
       if (!/^0x[0-9a-fA-F]{64}$/.test(raw)) return { ok: false, reason: 'BAD_ADDRESS' }
       return { ok: true, address: raw.toLowerCase() }
@@ -85,8 +85,8 @@ export type HostInfo = {
   status: HostStatus
   /** `<origin>/.well-known/tip-router` */
   url: string
-  /** Checksummed host tipjar on PAY_NETWORK. null unless status === 'ok'. */
-  tipjar: Address | null
+  /** Host's primary payable tipjar. Use `tipjars[network]` for a selected payment network. */
+  tipjar: string | null
   /** Every valid tipjar the host advertises, by network. */
   tipjars: Tipjars
   /** Host share in bps. 0 unless status === 'ok'. */
@@ -101,13 +101,13 @@ export type ResolveResult = {
   origin: string
   /** Network the tip is paid on. */
   network: Network
-  /** Checksummed receiver (user) tipjar on `network`. */
-  receiver: Address
+  /** Primary payable receiver tipjar. Use `receiverTipjars[network]` for a selected payment network. */
+  receiver: string
   /** Every valid tipjar the profile advertises, by network. */
   receiverTipjars: Tipjars
   receiverSource: { url: string; contentType: string | null; candidates: number }
   host: HostInfo
-  /** Receiver share passed to `tip()`: 10000 - feeBps, or 10000 when host is not ok. */
+  /** Split for the primary network. Recalculate from `host.tipjars` for a selected network. */
   ratioBps: number
   resolvedAt: string
 }
@@ -217,10 +217,10 @@ export function parseWellKnown(text: string, url: string): HostInfo {
     return invalid('fee-out-of-range', tipjars)
   }
 
-  const payTipjar = tipjars[PAY_NETWORK]
+  const payTipjar = NETWORK_NAMES.map((network) => tipjars[network]).find((address) => address !== undefined)
   if (payTipjar === undefined) return invalid('no-payable-tipjar', tipjars)
 
-  return { status: 'ok', url, tipjar: payTipjar as Address, tipjars, feeBps }
+  return { status: 'ok', url, tipjar: payTipjar, tipjars, feeBps }
 }
 
 export function feeBpsToRatioBps(feeBps: number): number {

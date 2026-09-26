@@ -1,5 +1,6 @@
 import { useTipFlow } from './hooks/useTipFlow.ts'
 import { useWallet } from './hooks/useWallet.ts'
+import { useSuiWallet } from './hooks/useSuiWallet.ts'
 import { chain } from './lib/chain.ts'
 import { ErrorBox } from './components/ErrorBox.tsx'
 import { ResolveCard } from './components/ResolveCard.tsx'
@@ -11,11 +12,12 @@ import './App.css'
 
 function App() {
   const wallet = useWallet()
-  const { state, resolve, send, verify, reset } = useTipFlow()
+  const suiWallet = useSuiWallet()
+  const { state, resolve, sendEthereum, sendSui, verify, reset } = useTipFlow()
   const { step, error } = state
 
   const showResolved = !!state.resolved
-  const showTx = !!state.hash
+  const showTx = !!state.result
   const showVerify = !!state.tipped
 
   return (
@@ -24,8 +26,7 @@ function App() {
         <div>
           <h1>general-tipper</h1>
           <p className="tagline">
-            Tip any web2 profile with ETH. The tip is split between the user and the server that hosts them, using
-            addresses they publish themselves.
+            Tip any web2 profile with Ethereum or Sui, using addresses the user and host publish themselves.
           </p>
         </div>
         <div className="top-right">
@@ -46,14 +47,17 @@ function App() {
 
         {showResolved && (
           <TipForm
-            wallet={wallet}
+            resolved={state.resolved!}
+            ethereum={wallet}
+            sui={suiWallet}
             sending={step === 'sending'}
-            onSend={(amount) => wallet.account && send(wallet.account, amount)}
+            onSendEthereum={(amount) => wallet.account && sendEthereum(wallet.account, amount)}
+            onSendSui={(amount) => suiWallet.wallet && suiWallet.account && sendSui(suiWallet.wallet, suiWallet.account, amount)}
           />
         )}
         {error?.at === 'sending' && <ErrorBox message={error.message} />}
 
-        {showTx && state.hash && <TxCard hash={state.hash} tipped={state.tipped} />}
+        {showTx && state.result && <TxCard result={state.result} tipped={state.tipped} />}
 
         {showVerify && <VerifyCard report={state.report} verifying={step === 'verifying'} onVerify={verify} />}
         {error?.at === 'verifying' && <ErrorBox message={error.message} />}

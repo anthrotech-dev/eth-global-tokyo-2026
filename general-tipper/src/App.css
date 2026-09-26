@@ -60,6 +60,16 @@ main {
   flex-wrap: wrap;
   margin-top: 12px;
 }
+.network-picker {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0 12px;
+}
+.network-picker button.selected {
+  border-color: var(--accent-border);
+  background: var(--accent);
+  color: white;
+}
 .row input[type='url'] {
   flex: 1 1 320px;
 }

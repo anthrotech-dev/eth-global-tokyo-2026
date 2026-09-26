@@ -44,7 +44,7 @@ export function ResolveCard({ resolved }: { resolved: ResolveResult }) {
         <dd>{NETWORKS[resolved.network].label}</dd>
         <dt>Receiver</dt>
         <dd>
-          <AddressLink address={resolved.receiver} />
+          <AddressLink address={resolved.receiver as `0x${string}`} />
           {resolved.receiverSource.candidates > 1 && (
             <span className="warn">
               {' '}
@@ -55,7 +55,7 @@ export function ResolveCard({ resolved }: { resolved: ResolveResult }) {
         </dd>
         <dt>Host</dt>
         <dd>
-          {resolved.host.tipjar ? <AddressLink address={resolved.host.tipjar} /> : <em>none (zero address)</em>}
+          {resolved.host.tipjar ? <AddressLink address={resolved.host.tipjar as `0x${string}`} /> : <em>none (zero address)</em>}
           <div className="hint">{hostNote(resolved)}</div>
           <OtherTipjars tipjars={resolved.host.tipjars} except={resolved.network} />
         </dd>

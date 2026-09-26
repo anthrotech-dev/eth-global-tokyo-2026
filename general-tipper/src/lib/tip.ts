@@ -23,7 +23,11 @@ export type TippedEvent = {
 }
 
 export function tipArgs(resolved: ResolveResult): readonly [string, Address, Address, number] {
-  return [resolved.targetURI, resolved.receiver, resolved.host.tipjar ?? ZERO_ADDRESS, resolved.ratioBps]
+  const receiver = resolved.receiverTipjars.ethereum
+  if (!receiver) throw new Error('This profile does not accept tips on Ethereum.')
+  const host = resolved.host.tipjars.ethereum ?? ZERO_ADDRESS
+  const ratioBps = resolved.host.tipjars.ethereum ? resolved.ratioBps : 10_000
+  return [resolved.targetURI, receiver as Address, host as Address, ratioBps]
 }
 
 /** Simulate first so custom errors are decoded by viem, then ask the wallet to sign. */
