@@ -60,12 +60,12 @@ export function verifyTip(ev: TippedEvent, fresh: ResolveResult, inputUrl?: stri
   checks.push({
     id: 'receiver',
     label: 'Receiver == tipjar declared on the profile',
-    pass: isAddressEqual(fresh.receiver, ev.receiver),
-    expected: fresh.receiver,
+    pass: !!fresh.receiverTipjars.ethereum && isAddressEqual(fresh.receiverTipjars.ethereum as `0x${string}`, ev.receiver),
+    expected: fresh.receiverTipjars.ethereum ?? '(not advertised)',
     actual: ev.receiver,
   })
 
-  const expectedHost = fresh.host.tipjar ?? ZERO_ADDRESS
+  const expectedHost = (fresh.host.tipjars.ethereum ?? ZERO_ADDRESS) as `0x${string}`
   checks.push({
     id: 'host',
     label: 'Host == tipjar declared in /.well-known/tip-router',

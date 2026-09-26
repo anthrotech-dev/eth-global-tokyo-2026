@@ -12,6 +12,9 @@
     "cf-typegen": "wrangler types"
   },
   "dependencies": {
+    "@mysten/sui": "^2.33.1",
+    "@mysten/wallet-standard": "^0.21.30",
+    "@wallet-standard/app": "^1.1.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "viem": "^2.56.9"

@@ -1,36 +1,42 @@
-import { formatEther, type Hash } from 'viem'
+import { formatEther } from 'viem'
 import { chainKey, explorerTxUrl } from '../lib/chain.ts'
+import { suiExplorerTxUrl } from '../lib/sui.ts'
+import type { PaymentResult } from '../hooks/useTipFlow.ts'
 import type { TippedEvent } from '../lib/tip.ts'
 import { AddressLink } from './AddressLink.tsx'
 
 type Props = {
-  hash: Hash
+  result: PaymentResult
   tipped?: TippedEvent
 }
 
-export function TxCard({ hash, tipped }: Props) {
-  const explorer = explorerTxUrl(hash)
+export function TxCard({ result, tipped }: Props) {
+  const { network, txId } = result
+  const explorer = network === 'ethereum' ? explorerTxUrl(txId as `0x${string}`) : suiExplorerTxUrl(txId)
   const receiverPct = tipped ? Number((tipped.receiverAmount * 10_000n) / tipped.amount) / 100 : 0
 
   return (
     <section className="card">
       <h2>4. Transaction</h2>
       <dl className="kv">
-        <dt>tx hash</dt>
+        <dt>{network === 'ethereum' ? 'tx hash' : 'digest'}</dt>
         <dd>
           {explorer ? (
             <a href={explorer} target="_blank" rel="noreferrer">
-              <code className="addr">{hash}</code>
+              <code className="addr">{txId}</code>
             </a>
           ) : (
             <>
-              <code className="addr">{hash}</code>
+              <code className="addr">{txId}</code>
               <div className="hint">No block explorer for {chainKey}. Inspect the log with `cast receipt`.</div>
             </>
           )}
         </dd>
       </dl>
-      {!tipped && <p className="hint">Waiting for the transaction to be mined…</p>}
+      {!tipped && network === 'ethereum' && <p className="hint">Waiting for the transaction to be mined…</p>}
+      {!tipped && network === 'sui' && (
+        <p className="hint">Executed on Sui testnet. Open the digest to inspect the on-chain Tipped event.</p>
+      )}
       {tipped && (
         <>
           <h3>Tipped event</h3>
