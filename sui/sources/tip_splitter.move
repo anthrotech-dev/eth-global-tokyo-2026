@@ -31,7 +31,7 @@ public struct Tipped has copy, drop {
 
 /// Distributes a submitted tip coin with the same allocation maths as EVM.
 /// It deliberately holds no shared state or funds after execution.
-public entry fun tip<T>(
+public fun tip<T>(
     payment: Coin<T>,
     target_uri: String,
     receiver: address,
@@ -129,6 +129,7 @@ fun test_tip_rejects_zero_amount() {
     let mut scenario = ts::begin(TIPPER);
     let payment = coin::mint_for_testing<SUI>(0, scenario.ctx());
     tip<SUI>(payment, string::utf8(b"tip"), RECEIVER, HOST, 8000, scenario.ctx());
+    scenario.end();
 }
 
 #[test]
@@ -137,6 +138,7 @@ fun test_tip_rejects_invalid_ratio() {
     let mut scenario = ts::begin(TIPPER);
     let payment = coin::mint_for_testing<SUI>(100, scenario.ctx());
     tip<SUI>(payment, string::utf8(b"tip"), RECEIVER, HOST, 10_001, scenario.ctx());
+    scenario.end();
 }
 
 #[test]
@@ -145,4 +147,5 @@ fun test_tip_requires_host_when_it_has_a_share() {
     let mut scenario = ts::begin(TIPPER);
     let payment = coin::mint_for_testing<SUI>(100, scenario.ctx());
     tip<SUI>(payment, string::utf8(b"tip"), RECEIVER, @0x0, 8000, scenario.ctx());
+    scenario.end();
 }
